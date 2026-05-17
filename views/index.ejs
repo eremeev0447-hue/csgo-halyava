@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS:GO Халява</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ШАПКА -->
+  <div class="site-header">
+    <img src="/images/banner.png" alt="ХАЛЯВА FASTERA">
+  </div>
+
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
+  <div class="site-body">
+
+    <nav class="tabs">
+      <button class="tab-button active" onclick="showTab(0)">ХАЛЯВА</button>
+      <button class="tab-button" onclick="showTab(1)">РОЗЫГРЫШИ</button>
+      <button class="tab-button" onclick="showTab(2)">FAQ</button>
+    </nav>
+
+    <div id="tab-0" class="tab-content active">
+      <div class="grid">
+        <% cards.forEach(card => { %>
+        <div class="card" onclick="openCard('<%= card._id %>')">
+
+          <!-- ВЕРХ: текст + бейджи -->
+          <div class="card-top">
+            <p class="card-title"><%= card.description %></p>
+            <% if (card.subtext) { %><p class="small card-subtext"><%= card.subtext %></p><% } %>
+            <div class="badges">
+              <% (card.badges || []).forEach(b => { %><span class="badge <%= b.toLowerCase() %>"><%= b %></span><% }); %>
+            </div>
+          </div>
+
+          <!-- КАРТИНКА -->
+          <img src="<%= card.image %>" class="logo" alt="<%= card.title %>">
+
+          <!-- НИЗ: промокод + кнопка -->
+          <div class="card-bottom">
+            <% if (card.promoCode) { %>
+            <div class="promo-btn" onclick="event.stopImmediatePropagation(); copyPromoMain('<%= card.promoCode.replace(/'/g, "\\'") %>', this)">
+              🎁 Скопировать промокод 🎁
+            </div>
+            <% } %>
+            <a href="<%= card.link %>" target="_blank" class="btn" onclick="event.stopImmediatePropagation()">ПОЛУЧИТЬ ХАЛЯВУ</a>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <% if (cards.length === 0) { %>
+        <p style="text-align:center; color:#666; margin-top:80px; font-size:1.2rem;">Карточек пока нет</p>
+      <% } %>
+    </div>
+
+    <div id="tab-1" class="tab-content">
+      <h2 style="text-align:center; margin-top:100px; color:#666;">Розыгрыши</h2>
+      <p style="text-align:center; color:#888;">Скоро здесь будут розыгрыши</p>
+    </div>
+
+    <div id="tab-2" class="tab-content">
+      <% if (faq.length === 0) { %>
+        <p style="text-align:center; color:#666; margin-top:80px; font-size:1.2rem;">Вопросов пока нет</p>
+      <% } else { %>
+        <div class="faq-container">
+          <% faq.forEach((item, i) => { %>
+          <div class="faq-item">
+            <button class="faq-question" onclick="toggleFaq(<%= i %>)">
+              <span><%= item.question %></span>
+              <span class="faq-arrow" id="arrow-<%= i %>">▼</span>
+            </button>
+            <div class="faq-answer" id="faq-answer-<%= i %>">
+              <%= item.answer %>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+
+  <!-- ФУТЕР -->
+  <footer class="site-footer">
+    <div class="footer-links">
+
+      <!-- ════════════════════════════════════════════════════
+           ★  ССЫЛКИ ФУТЕРА — МЕНЯЙ ТОЛЬКО href="..."  ★
+           ════════════════════════════════════════════════════
+           1) Сотрудничество  → https://t.me/valera228980
+           2) Телеграм-канал  → https://t.me/FASTERyt69
+           3) YouTube-канал   → https://www.youtube.com/@fastercs2
+           4) По поводу багов → https://t.me/valera228980
+      ════════════════════════════════════════════════════ -->
+
+      <!-- 1) Сотрудничество — иконка рукопожатия -->
+      <a href="https://t.me/valera228980" target="_blank" class="footer-btn">
+        <svg width="26" height="26" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 36l8-8 8 4 8-8 8 4 8-8 8 4 8-8" stroke="none"/>
+          <path d="M10 42c0 0 4-6 10-4l4 2 4-4 4 2 4-4 4 2c6 2 8 6 8 6" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M6 38l6 6" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+          <path d="M52 38l6 6" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+          <path d="M18 26l-8-8" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+          <path d="M46 26l8-8" stroke="#ccc" stroke-width="3" stroke-linecap="round"/>
+          <path d="M20 24l6 4 6-6 6 4 6-4" stroke="#ccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+        Сотрудничество
+      </a>
+
+      <!-- 2) Телеграм-канал — крупная иконка -->
+      <a href="https://t.me/FASTERyt69" target="_blank" class="footer-btn">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="#2AABEE"/>
+          <path d="M17.93 6.82L15.73 17.6c-.16.73-.6.9-1.22.56l-3.36-2.47-1.62 1.56c-.18.18-.33.33-.68.33l.24-3.41 6.2-5.6c.27-.24-.06-.37-.42-.13L7.02 14.6 3.74 13.58c-.72-.23-.73-.72.15-1.07l12.93-4.98c.6-.22 1.12.15 1.11.29z" fill="white"/>
+        </svg>
+        Телеграм-канал
+      </a>
+
+      <!-- 3) YouTube — крупный треугольник -->
+      <a href="https://www.youtube.com/@fastercs2" target="_blank" class="footer-btn">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="5" width="22" height="14" rx="4" fill="#FF0000"/>
+          <polygon points="9.5,8.5 9.5,15.5 16.5,12" fill="white"/>
+        </svg>
+        YouTube-канал
+      </a>
+
+      <!-- 4) По поводу багов — иконка жука -->
+      <a href="https://t.me/valera228980" target="_blank" class="footer-btn">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="12" cy="13.5" rx="4" ry="5.5" fill="#cc2244"/>
+          <circle cx="12" cy="7.2" r="2.2" fill="#cc2244"/>
+          <line x1="10.5" y1="5.5" x2="8" y2="3" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="13.5" y1="5.5" x2="16" y2="3" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="8" y1="10.5" x2="4.5" y2="9" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="8" y1="13.5" x2="4.5" y2="13.5" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="8" y1="16.5" x2="4.5" y2="18" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="16" y1="10.5" x2="19.5" y2="9" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="16" y1="13.5" x2="19.5" y2="13.5" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="16" y1="16.5" x2="19.5" y2="18" stroke="#bbb" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="12" y1="9" x2="12" y2="19" stroke="rgba(0,0,0,0.25)" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        По поводу багов
+      </a>
+
+    </div>
+    <p class="footer-copy">© 2025 Халява Fastera. Все права защищены.</p>
+  </footer>
+
+  <!-- Модальное окно -->
+  <div id="cardModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>window.__CARDS__ = <%- JSON.stringify(cards) %>;</script>
+  <script src="/js/script.js"></script>
+  <% if (openCardId) { %>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      openCard('<%= openCardId %>');
+    });
+  </script>
+  <% } %>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админ-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { padding: 30px 20px; background: #0d0d0d; }
+    h1, h2, h3 { color: white; }
+    .admin-form { background: #1a1a1a; padding: 24px; border-radius: 12px; margin: 20px 0; border: 1px solid #2a2a2a; }
+    .admin-form label { display: block; color: #aaa; font-size: 14px; margin-top: 14px; margin-bottom: 4px; }
+    input[type="text"], input[type="file"], textarea {
+      width: 100%; padding: 12px; font-size: 16px;
+      background: #111; border: 1px solid #333; color: white;
+      border-radius: 6px; box-sizing: border-box; font-family: 'Inter', sans-serif;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .btn-submit { width: 100%; padding: 14px; margin-top: 16px; background: #ffd700; color: black; font-weight: bold; cursor: pointer; font-size: 16px; border: none; border-radius: 6px; }
+    .btn-submit:hover { background: #e6c200; }
+    .btn-submit.blue { background: #4a90e2; color: white; }
+    .btn-submit.blue:hover { background: #357abd; }
+    .btn-submit.green { background: #00c853; color: black; }
+    .btn-submit.green:hover { background: #00a844; }
+    .btn-logout { padding: 8px 16px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .btn-logout:hover { background: #444; color: white; }
+    .btn-delete { padding: 7px 12px; background: #ff2d55; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; flex-shrink: 0; }
+    .btn-delete:hover { background: #e0263f; }
+    .btn-edit { padding: 7px 12px; background: #2a5298; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; flex-shrink: 0; text-decoration: none; display: inline-block; }
+    .btn-edit:hover { background: #3a6bc8; }
+    .card-item { background:#1e1e1e; padding:14px 16px; margin:8px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:center; gap: 10px; border: 1px solid #2a2a2a; }
+    .card-item.editing { border-color: #ffd700; }
+    .card-item-info { display: flex; align-items: center; gap: 12px; overflow: hidden; flex: 1; }
+    .card-item img { height: 40px; width: 60px; object-fit: contain; flex-shrink: 0; background: #111; border-radius: 4px; }
+    .card-item-btns { display: flex; gap: 6px; flex-shrink: 0; }
+    .faq-item-row { background:#1e1e1e; padding:14px 16px; margin:8px 0; border-radius:8px; display:flex; justify-content:space-between; align-items:flex-start; gap: 14px; border: 1px solid #2a2a2a; }
+    .faq-item-text { flex: 1; overflow: hidden; }
+    .faq-item-text strong { color: #fff; font-size: 15px; display: block; margin-bottom: 4px; }
+    .faq-item-text span { color: #888; font-size: 13px; display: block; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .divider { color: #555; font-size: 13px; margin: 10px 0 4px; text-align: center; }
+    .error { background: #3a0000; border: 1px solid #ff4444; color: #ff8888; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .success { background: #003a00; border: 1px solid #00c853; color: #00ff9d; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+    .section-title { color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; margin-bottom: 4px; border-top: 1px solid #222; padding-top: 16px; }
+    .section-divider { border: none; border-top: 2px solid #2a2a2a; margin: 40px 0 30px; }
+    .edit-banner { background: #1a1200; border: 2px solid #ffd700; color: #ffd700; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: bold; }
+    .current-image { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .current-image img { height: 50px; background: #111; border-radius: 4px; padding: 4px; border: 1px solid #333; }
+    .current-image span { color: #888; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="header-row">
+    <h1>Админ-панель</h1>
+    <div>
+      <a href="/" style="color:#aaa; margin-right: 16px;">← На главную</a>
+      <form method="POST" action="/admin/logout" style="display:inline;">
+        <button class="btn-logout" type="submit">Выйти</button>
+      </form>
+    </div>
+  </div>
+
+  <% if (error) { %>
+    <div class="error"><%= error %></div>
+  <% } %>
+
+  <!-- ─── ФОРМА: ДОБАВИТЬ / РЕДАКТИРОВАТЬ КАРТОЧКУ ─── -->
+  <% if (editCard) { %>
+    <div class="edit-banner">✏️ Режим редактирования карточки: <%= editCard.title %> — <a href="/admin" style="color:#ffd700;">Отменить</a></div>
+    <div class="admin-form">
+      <h2>Редактировать карточку</h2>
+      <form method="POST" action="/admin/edit" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<%= editCard.id %>">
+
+        <label>Название сайта *</label>
+        <input type="text" name="title" value="<%= editCard.title %>" required>
+
+        <label>Загрузить новое изображение (оставь пустым — сохранится текущее)</label>
+        <input type="file" name="image" accept="image/*">
+        <div class="current-image">
+          <img src="<%= editCard.image %>" alt="текущее">
+          <span>Текущее изображение</span>
+        </div>
+        <p style="color:#555; font-size:13px; margin-top:6px;">Или вставь URL вручную (перезапишет текущее):</p>
+        <input type="text" name="imageUrl" placeholder="<%= editCard.image %>">
+
+        <label>Бейджи (через запятую)</label>
+        <input type="text" name="badges" value="<%= (editCard.badges || []).join(', ') %>">
+
+        <label>Главный текст *</label>
+        <input type="text" name="description" value="<%= editCard.description %>" required>
+
+        <label>Дополнительный текст</label>
+        <input type="text" name="subtext" value="<%= editCard.subtext || '' %>">
+
+        <p class="section-title">Промокод</p>
+        <label>Текст промо</label>
+        <input type="text" name="promoText" value="<%= editCard.promoText || '' %>">
+        <label>Промокод</label>
+        <input type="text" name="promoCode" value="<%= editCard.promoCode || '' %>">
+
+        <label>Ссылка *</label>
+        <input type="text" name="link" value="<%= editCard.link %>" required>
+
+        <label>Задания</label>
+        <input type="text" name="tasks" value="<%= editCard.tasks || 'НЕТ ЗАДАНИЙ' %>">
+
+        <button class="btn-submit green" type="submit">💾 Сохранить изменения</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="admin-form">
+      <h2>Добавить карточку</h2>
+      <form method="POST" action="/admin/add" enctype="multipart/form-data">
+
+        <label>Название сайта *</label>
+        <input type="text" name="title" placeholder="Например: TOPSKIN" required>
+
+        <label>Загрузить изображение</label>
+        <input type="file" name="image" accept="image/*">
+        <p class="divider">— или вставь URL картинки вручную —</p>
+        <input type="text" name="imageUrl" placeholder="/images/topskin.png или https://...">
+
+        <label>Бейджи (через запятую)</label>
+        <input type="text" name="badges" placeholder="NEW, HOT">
+
+        <label>Главный текст *</label>
+        <input type="text" name="description" placeholder="Бесплатные скины каждый день" required>
+
+        <label>Дополнительный текст</label>
+        <input type="text" name="subtext" placeholder="Без регистрации">
+
+        <p class="section-title">Промокод (опционально)</p>
+        <label>Текст промо</label>
+        <input type="text" name="promoText" placeholder="Используй промокод и получи +10% к балансу">
+        <label>Промокод</label>
+        <input type="text" name="promoCode" placeholder="CSGOHALYAVA">
+
+        <label>Ссылка *</label>
+        <input type="text" name="link" placeholder="https://example.com" required>
+
+        <label>Задания</label>
+        <input type="text" name="tasks" value="НЕТ ЗАДАНИЙ">
+
+        <button class="btn-submit" type="submit">Добавить карточку</button>
+      </form>
+    </div>
+  <% } %>
+
+  <!-- ─── СПИСОК КАРТОЧЕК ─── -->
+  <h2 style="margin-bottom:10px;">Текущие карточки (<%= cards.length %>)</h2>
+  <% cards.forEach(card => { %>
+    <div class="card-item <%= editCard && editCard.id === card._id ? 'editing' : '' %>">
+      <div class="card-item-info">
+        <img src="<%= card.image %>" alt="">
+        <span style="color:#ccc; overflow:hidden;">
+          <strong style="color:#fff;"><%= card.title %></strong> — <%= card.description %>
+          <% if (card.promoCode) { %><br><small style="color:#00ff9d;">Промокод: <%= card.promoCode %></small><% } %>
+        </span>
+      </div>
+      <div class="card-item-btns">
+        <a href="/admin?edit=<%= card._id %>" class="btn-edit">✏️ Изменить</a>
+        <form method="POST" action="/admin/delete" style="margin:0;">
+          <input type="hidden" name="id" value="<%= card._id %>">
+          <button class="btn-delete" type="submit" onclick="return confirm('Удалить «<%= card.title %>»?')">🗑 Удалить</button>
+        </form>
+      </div>
+    </div>
+  <% }); %>
+  <% if (cards.length === 0) { %>
+    <p style="color:#555; text-align:center; padding: 30px;">Карточек пока нет</p>
+  <% } %>
+
+  <!-- ─── FAQ ─── -->
+  <hr class="section-divider" id="faq-section">
+  <div class="admin-form">
+    <h2>Добавить вопрос в FAQ</h2>
+    <form method="POST" action="/admin/faq/add">
+      <label>Вопрос *</label>
+      <input type="text" name="question" placeholder="Как получить бесплатные скины?" required>
+      <label>Ответ *</label>
+      <textarea name="answer" placeholder="Подробный ответ на вопрос..." required></textarea>
+      <button class="btn-submit blue" type="submit">Добавить вопрос</button>
+    </form>
+  </div>
+
+  <h2 style="margin-bottom:10px;">Вопросы в FAQ (<%= faq.length %>)</h2>
+  <% faq.forEach(item => { %>
+    <div class="faq-item-row">
+      <div class="faq-item-text">
+        <strong><%= item.question %></strong>
+        <span><%= item.answer.length > 120 ? item.answer.substring(0, 120) + '...' : item.answer %></span>
+      </div>
+      <form method="POST" action="/admin/faq/delete">
+        <input type="hidden" name="id" value="<%= item._id %>">
+        <button class="btn-delete" type="submit" onclick="return confirm('Удалить этот вопрос?')">🗑 Удалить</button>
+      </form>
+    </div>
+  <% }); %>
+  <% if (faq.length === 0) { %>
+    <p style="color:#555; text-align:center; padding: 30px;">Вопросов пока нет</p>
+  <% } %>
+
+</body>
+</html>
